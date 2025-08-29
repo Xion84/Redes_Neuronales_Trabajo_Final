@@ -1,0 +1,6 @@
+# Evita subir datasets grandes
+data/raw/*.csv
+
+# Pero NO ignores:
+# models/
+# data/processed/
