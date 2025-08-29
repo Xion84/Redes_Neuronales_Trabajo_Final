@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Predicción de Churn - Telco</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 18px;
+      text-align: center;
+      display: none;
+    }
+    .high-risk {
+      background-color: #ffeaea;
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+    }
+    .low-risk {
+      background-color: #e8f5e9;
+      color: #27ae60;
+      border: 1px solid #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Predicción de Abandono de Clientes (Churn)</h1>
+    <p>Ingrese los datos del cliente para predecir si está en riesgo de abandonar el servicio.</p>
+
+    <form id="churnForm">
+      <label for="gender">Género</label>
+      <select id="gender" required>
+        <option value="Male">Masculino</option>
+        <option value="Female">Femenino</option>
+      </select>
+
+      <label for="SeniorCitizen">¿Es adulto mayor?</label>
+      <select id="SeniorCitizen" required>
+        <option value="0">No</option>
+        <option value="1">Sí</option>
+      </select>
+
+      <label for="Partner">¿Tiene pareja?</label>
+      <select id="Partner" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="Dependents">¿Tiene dependientes?</label>
+      <select id="Dependents" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="tenure">Meses como cliente (tenure)</label>
+      <input type="number" id="tenure" min="0" max="72" required />
+
+      <label for="PhoneService">¿Tiene servicio telefónico?</label>
+      <select id="PhoneService" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="MultipleLines">¿Tiene múltiples líneas?</label>
+      <select id="MultipleLines" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+        <option value="No phone service">Sin servicio telefónico</option>
+      </select>
+
+      <label for="InternetService">Servicio de Internet</label>
+      <select id="InternetService" required>
+        <option value="DSL">DSL</option>
+        <option value="Fiber optic">Fibra Óptica</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="OnlineSecurity">¿Tiene seguridad en línea?</label>
+      <select id="OnlineSecurity" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+        <option value="No internet service">Sin internet</option>
+      </select>
+
+      <label for="OnlineBackup">¿Tiene respaldo en línea?</label>
+      <select id="OnlineBackup" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+        <option value="No internet service">Sin internet</option>
+      </select>
+
+      <label for="DeviceProtection">¿Tiene protección de dispositivo?</label>
+      <select id="DeviceProtection" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+        <option value="No internet service">Sin internet</option>
+      </select>
+
+      <label for="TechSupport">¿Tiene soporte técnico?</label>
+      <select id="TechSupport" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+        <option value="No internet service">Sin internet</option>
+      </select>
+
+      <label for="StreamingTV">¿Tiene TV por streaming?</label>
+      <select id="StreamingTV" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+        <option value="No internet service">Sin internet</option>
+      </select>
+
+      <label for="StreamingMovies">¿Tiene películas por streaming?</label>
+      <select id="StreamingMovies" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+        <option value="No internet service">Sin internet</option>
+      </select>
+
+      <label for="Contract">Tipo de contrato</label>
+      <select id="Contract" required>
+        <option value="Month-to-month">Mes a mes</option>
+        <option value="One year">Un año</option>
+        <option value="Two year">Dos años</option>
+      </select>
+
+      <label for="PaperlessBilling">¿Facturación electrónica?</label>
+      <select id="PaperlessBilling" required>
+        <option value="Yes">Sí</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="PaymentMethod">Método de pago</label>
+      <select id="PaymentMethod" required>
+        <option value="Electronic check">Cheque electrónico</option>
+        <option value="Mailed check">Cheque por correo</option>
+        <option value="Bank transfer (automatic)">Transferencia bancaria</option>
+        <option value="Credit card (automatic)">Tarjeta de crédito</option>
+      </select>
+
+      <label for="MonthlyCharges">Cargos mensuales ($)</label>
+      <input type="number" id="MonthlyCharges" step="0.01" min="0" required />
+
+      <label for="TotalCharges">Cargos totales ($)</label>
+      <input type="number" id="TotalCharges" step="0.01" min="0" required />
+
+      <button type="submit">Predecir Churn</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById('churnForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const data = {
+        gender: form.gender.value,
+        SeniorCitizen: parseInt(form.SeniorCitizen.value),
+        Partner: form.Partner.value,
+        Dependents: form.Dependents.value,
+        tenure: parseInt(form.tenure.value),
+        PhoneService: form.PhoneService.value,
+        MultipleLines: form.MultipleLines.value,
+        InternetService: form.InternetService.value,
+        OnlineSecurity: form.OnlineSecurity.value,
+        OnlineBackup: form.OnlineBackup.value,
+        DeviceProtection: form.DeviceProtection.value,
+        TechSupport: form.TechSupport.value,
+        StreamingTV: form.StreamingTV.value,
+        StreamingMovies: form.StreamingMovies.value,
+        Contract: form.Contract.value,
+        PaperlessBilling: form.PaperlessBilling.value,
+        PaymentMethod: form.PaymentMethod.value,
+        MonthlyCharges: parseFloat(form.MonthlyCharges.value),
+        TotalCharges: parseFloat(form.TotalCharges.value)
+      };
+
+      try {
+        const response = await fetch('http://localhost:5000/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+
+        if (result.churn_prediction) {
+          resultDiv.className = 'high-risk';
+          resultDiv.innerHTML = `
+            <strong>🚨 ALTO RIESGO DE ABANDONO</strong><br>
+            Probabilidad de churn: ${(result.churn_probability * 100).toFixed(2)}%
+          `;
+        } else {
+          resultDiv.className = 'low-risk';
+          resultDiv.innerHTML = `
+            <strong>✅ BAJO RIESGO DE ABANDONO</strong><br>
+            Probabilidad de churn: ${(result.churn_probability * 100).toFixed(2)}%
+          `;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

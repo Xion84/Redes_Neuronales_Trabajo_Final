@@ -12,13 +12,14 @@ import numpy as np
 import joblib
 from tensorflow.keras.models import load_model
 import os
+import sys
 
 # Inicializar la app Flask
-app = Flask(__name__)
+app = Flask(__name__, static_folder="web", static_url_path="")
 
 # Rutas a los modelos y scaler
 MODEL_PATH = "../models/MLP-2.h5"
-SCALER_PATH = "../models/scaler.pkl"
+SCALER_PATH = ".../models/scaler.pkl"
 
 # Cargar el modelo y el scaler al iniciar la app
 print("[INFO] Cargando modelo y scaler...")
@@ -32,7 +33,19 @@ except Exception as e:
     scaler = None
 
 # Obtener las características esperadas (después del one-hot)
-EXPECTED_FEATURES = pd.read_csv("../data/processed/X_train.csv").columns.tolist()
+#
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+data_path = os.path.join(project_root, "data", "processed", "X_train.csv")
+
+print(f"[INFO] Buscando X_train.csv en: {data_path}")
+
+# Leer el archivo
+try:
+    EXPECTED_FEATURES = pd.read_csv(data_path).columns.tolist()
+    print("[INFO] Archivo X_train.csv cargado correctamente.")
+except FileNotFoundError as e:
+    print(f"[ERROR] No se encontró el archivo: {e}")
+    raise
 
 
 @app.route("/health", methods=["GET"])
@@ -147,6 +160,14 @@ def predict():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+
+@app.route("/")
+def home():
+    """
+    Página web principal.
+    """
+    return app.send_static_file("index.html")
 
 
 if __name__ == "__main__":
