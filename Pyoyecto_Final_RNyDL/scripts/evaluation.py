@@ -1,3 +1,4 @@
+# Evaluación
 # %%
 import tensorflow as tf
 from tensorflow.keras.models import load_model
@@ -138,7 +139,6 @@ print(results_df)
 # Guardar tabla
 results_df.to_csv("../results/model_comparison.csv", index=False)
 
-# %%
 # %%
 # Comparación con modelo base: Regresión Logística
 from sklearn.linear_model import LogisticRegression
