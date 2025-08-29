@@ -15,20 +15,20 @@ import os
 
 # Inicializar la app Flask
 app = Flask(__name__, static_folder="web", static_url_path="/")
-
-# Habilitar CORS
-CORS(app)
+CORS(app)  # Habilita CORS para todos los orígenes
 
 # Rutas a los modelos y scaler
 MODEL_PATH = "../models/MLP-2.h5"
-SCALER_PATH = "../models/scaler.pkl"  # ✅ Corregido: era ".../models/scaler.pkl"
+SCALER_PATH = "../models/scaler.pkl"
 
 # Cargar el modelo y el scaler al iniciar la app
 print("[INFO] Cargando modelo y scaler...")
+model = None
+scaler = None
+
 try:
     model = load_model(MODEL_PATH)
     print("[INFO] Modelo cargado correctamente.")
-    print(f"[INFO] Capas del modelo: {[layer.name for layer in model.layers]}")
 except Exception as e:
     print(f"[ERROR] No se pudo cargar el modelo: {e}")
     model = None
@@ -45,14 +45,15 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 data_path = os.path.join(project_root, "data", "processed", "X_train.csv")
 print(f"[INFO] Buscando X_train.csv en: {data_path}")
 
+EXPECTED_FEATURES = []
 try:
-    EXPECTED_FEATURES = pd.read_csv(data_path).columns.tolist()
+    df_temp = pd.read_csv(data_path)
+    EXPECTED_FEATURES = df_temp.columns.tolist()
     print(
         f"[INFO] X_train.csv cargado. Número de características: {len(EXPECTED_FEATURES)}"
     )
 except Exception as e:
     print(f"[ERROR] No se pudo cargar X_train.csv: {e}")
-    EXPECTED_FEATURES = []
 
 
 @app.route("/health", methods=["GET"])
@@ -148,9 +149,11 @@ def predict():
 
         # Predicción
         prediction = model.predict(X, verbose=0)
-        churn_probability = float(prediction[0][0])
+        churn_probability = (
+            float(prediction[0][0]) if prediction[0][0] is not None else 0.0
+        )
 
-        # ✅ Corregido: Definir churn_prediction
+        # Definir churn_prediction
         churn_prediction = bool(churn_probability > 0.5)
 
         return jsonify(
@@ -162,7 +165,7 @@ def predict():
 
     except Exception as e:
         print(f"[ERROR] {e}")
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/")

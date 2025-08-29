@@ -13,10 +13,26 @@
   <!-- Contenedor principal -->
   <div class="container">
     <!-- Encabezado -->
-    <header>
-      <h1>🔍 Predicción de Churn</h1>
-      <p class="subtitle">Sistema de detección de abandono de clientes</p>
+   <!-- Encabezado Institucional -->
+    <header class="header-institucional">
+      <div class="university-info">
+        <h1>UNIVERSIDAD AMERICANA</h1>
+        <h2>Facultad de Ingeniería y Arquitectura</h2>
+        
+        <!-- Logo -->
+        <div class="logo-container">
+          <img src="images/logo.png" alt="Logo de la Universidad Americana" class="logo" />
+        </div>
+        
+        <h3>Maestría en Inteligencia de Negocios y Análisis de Datos</h3>
+      </div>
     </header>
+
+<!-- Título del proyecto -->
+<div class="project-title">
+  <h2>Predicción de Churn - Clientes de Telefonía</h2>
+  <p class="subtitle">Sistema de detección de abandono de clientes</p>
+</div>
 
     <!-- Formulario -->
     <div class="form-container">
@@ -111,7 +127,7 @@
 
     <!-- Pie de página -->
     <footer>
-      Proyecto Final - Redes Neuronales y Deep Learning | Maestría en Análisis de Datos e Inteligencia de Negocios
+      Proyecto Final - Redes Neuronales y Deep Learning | Maestría en Análisis de Datos e Inteligencia de Negocios - HG, DM, ER
     </footer>
   </div>
 
@@ -133,10 +149,15 @@
     const modalTitle = document.getElementById('modalTitle');
     const modalMessage = document.getElementById('modalMessage');
 
-    // Escuchar el envío del formulario
+    let resultadoPrediccion = {
+      churn_probability: 0.0,
+      churn_prediction: false
+    };
+
     document.getElementById('churnForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Simulación local (sin API)
       const form = e.target;
       const data = {
         gender: form.gender.value,
@@ -160,37 +181,25 @@
         TotalCharges: parseFloat(form.TotalCharges.value)
       };
 
-      try {
-        // Enviar solicitud a la API
-        const response = await fetch('http://localhost:5000/predict', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+      // Simulación de predicción local
+      const probabilidad = Math.random(); // Simula una probabilidad aleatoria
+      resultadoPrediccion.churn_probability = probabilidad;
+      resultadoPrediccion.churn_prediction = probabilidad > 0.5;
 
-        const result = await response.json();
-
-        // Mostrar modal con resultado
-        if (result.churn_prediction) {
-          modal.className = 'modal high-risk';
-          modalIcon.textContent = '🚨';
-          modalTitle.textContent = 'ALTO RIESGO DE ABANDONO';
-          modalMessage.textContent = `Probabilidad de churn: ${(result.churn_probability * 100).toFixed(2)}%`;
-        } else {
-          modal.className = 'modal low-risk';
-          modalIcon.textContent = '✅';
-          modalTitle.textContent = 'BAJO RIESGO DE ABANDONO';
-          modalMessage.textContent = `Probabilidad de churn: ${(result.churn_probability * 100).toFixed(2)}%`;
-        }
-
-        modal.style.display = 'flex';
-      } catch (error) {
-        modal.className = 'modal';
-        modalIcon.textContent = '❌';
-        modalTitle.textContent = 'ERROR';
-        modalMessage.textContent = 'No se pudo conectar con el modelo.';
-        modal.style.display = 'flex';
+      // Mostrar modal
+      if (resultadoPrediccion.churn_prediction) {
+        modal.className = 'modal high-risk';
+        modalIcon.textContent = '🚨';
+        modalTitle.textContent = 'ALTO RIESGO DE ABANDONO';
+        modalMessage.textContent = `Probabilidad de churn: ${(resultadoPrediccion.churn_probability * 100).toFixed(2)}%`;
+      } else {
+        modal.className = 'modal low-risk';
+        modalIcon.textContent = '✅';
+        modalTitle.textContent = 'BAJO RIESGO DE ABANDONO';
+        modalMessage.textContent = `Probabilidad de churn: ${(resultadoPrediccion.churn_probability * 100).toFixed(2)}%`;
       }
+
+      modal.style.display = 'flex';
     });
 
     // Función para cerrar el modal

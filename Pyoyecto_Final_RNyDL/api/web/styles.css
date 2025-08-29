@@ -13,6 +13,71 @@ body {
   padding: 20px;
 }
 
+/* Estilos para el encabezado institucional */
+.header-institucional {
+  text-align: center;
+  padding: 30px 20px;
+  background: #1a2a6c;
+  color: white;
+  border-bottom: 5px solid #3498db;
+}
+
+.header-institucional h1 {
+  font-size: 2.8em;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.header-institucional h2 {
+  font-size: 1.6em;
+  font-weight: 400;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.header-institucional h3 {
+  font-size: 1.4em;
+  font-weight: 500;
+  margin-top: 15px;
+  color: #a2d2ff;
+}
+
+.logo-container {
+  margin: 20px auto;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Título del proyecto (debajo del encabezado) */
+.project-title {
+  text-align: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.project-title h1 {
+  font-size: 2.5em;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.project-title .subtitle {
+  font-size: 1.1em;
+  color: #7f8c8d;
+  font-weight: 300;
+}
 .container {
   max-width: 900px;
   margin: 0 auto;
