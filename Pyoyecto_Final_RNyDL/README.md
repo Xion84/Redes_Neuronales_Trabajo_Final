@@ -1,10 +1,10 @@
 # Proyecto Final: Predicción de Churn con Redes Neuronales Artificiales y Deep Learning
 
-> **Maestría en Análisis de Datos e Inteligencia de Negocios**  
-> Asignatura: Redes Neuronales y Deep Learning  
-> Fecha de entrega: 16 de agosto de 2025  
-> Autores: [Hubert Gutiérrez, Danilo Matus, Enllely Roque]  
-> Profesor: Dr. Vladimir Gutiérrez  
+    > **Maestría en Análisis de Datos e Inteligencia de Negocios**  
+    > Asignatura: Redes Neuronales y Deep Learning  
+    > Fecha de entrega: 16 de agosto de 2025  
+    > Autores: [Hubert Gutiérrez, Danilo Matus, Enllely Roque]  
+    > Profesor: Dr. Vladimir Gutiérrez  
 
 ---
 
