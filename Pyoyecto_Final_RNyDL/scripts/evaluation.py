@@ -183,6 +183,41 @@ results_df = pd.concat(
 
 # Guardar tabla actualizada
 results_df.to_csv("../results/model_comparison.csv", index=False)
-print("\n[INFO] Tabla de comparación actualizada con modelo base.")
+print("\n[INFO] Tabla de comparación con modelo base.")
+
+# %%
+# Gráfico de comparación de validación cruzada (usando arrays guardados)
+
+print("\n[INFO] Generando gráfico de validación cruzada...")
+
+try:
+    # Verificar si los archivos existen
+    if not os.path.exists("../results/scores_lr.npy") or not os.path.exists(
+        "../results/scores_mlp2.npy"
+    ):
+        raise FileNotFoundError(
+            "Archivos .npy no encontrados. Ejecute primero 'cross_validation.py'."
+        )
+
+    # Cargar los scores guardados
+    scores_lr = np.load("../results/scores_lr.npy")
+    scores_mlp2 = np.load("../results/scores_mlp2.npy")
+
+    # Graficar
+    plt.figure(figsize=(8, 5))
+    plt.boxplot([scores_lr, scores_mlp2], labels=["Regresión Logística", "MLP-2"])
+    plt.ylabel("F1-Score (5-Fold)")
+    plt.title("Comparación de Generalización (Validación Cruzada)")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("../results/cv_comparison_boxplot.png", dpi=300, bbox_inches="tight")
+    plt.show()
+
+    print("[INFO] Gráfico de validación cruzada generado y guardado.")
+
+except FileNotFoundError as e:
+    print(f"[ERROR] {e}")
+except Exception as e:
+    print(f"[ERROR] No se pudo generar el gráfico: {e}")
 
 # %%

@@ -1,18 +1,27 @@
 # Proyecto Final: Predicción de Churn con Redes Neuronales Artificiales y Deep Learning
 
-    > **Maestría en Análisis de Datos e Inteligencia de Negocios**  
-    > Asignatura: Redes Neuronales y Deep Learning  
-    > Fecha de entrega: 16 de agosto de 2025  
-    > Autores: [Hubert Gutiérrez, Danilo Matus, Enllely Roque]  
-    > Profesor: Dr. Vladimir Gutiérrez  
+> **Maestría en Análisis de Datos e Inteligencia de Negocios**  
+> Asignatura: Redes Neuronales y Deep Learning  
+> Fecha de entrega: 16 de agosto de 2025  
+> Autores: Hubert Gutiérrez, Danilo Matus, Enllely Roque  
+> Profesor: Dr. Vladimir Gutiérrez  
+
+🔗 **Repositorio GitHub**: [https://github.com/Xion84/Redes_Neuronales_Trabajo_Final/tree/main/Pyoyecto_Final_RNyDL](https://github.com/Xion84/Redes_Neuronales_Trabajo_Final/tree/main/Pyoyecto_Final_RNyDL)
 
 ---
 
 ## 🎯 Objetivo del Proyecto
 
-    Desarrollar un modelo de **Red Neuronal Artificial (ANN)** para predecir el abandono de clientes (**churn**) en una empresa de telecomunicaciones, utilizando el conjunto de datos **Telco Customer Churn**. El proyecto incluye preprocesamiento, entrenamiento de múltiples arquitecturas de redes densas (MLP), evaluación en conjunto de prueba y comparación con un modelo base (regresión logística).
+Desarrollar un modelo de **Red Neuronal Artificial (ANN)** para predecir el abandono de clientes (**churn**) en una empresa de telecomunicaciones, utilizando el conjunto de datos **Telco Customer Churn**. El proyecto incluye:
 
-    Este proyecto cumple con todos los requisitos del instructivo del curso y sirve como base para un **paper académico** futuro, bajo la asesoría del Dr. Vladimir Gutiérrez.
+- Preprocesamiento de datos.
+- Entrenamiento de múltiples arquitecturas de redes densas (MLP).
+- Evaluación en conjunto de prueba.
+- Validación cruzada (K-Fold).
+- Comparación con modelo base (Regresión Logística).
+- Puesta en producción simulada mediante una API.
+
+Este proyecto cumple con todos los requisitos del instructivo del curso y sirve como base para un **paper académico** futuro, bajo la asesoría del Dr. Vladimir Gutiérrez.
 
 ---
 
@@ -33,7 +42,8 @@
     ├── scripts/
     │   ├── preprocessing.py
     │   ├── model_training.py
-    │   └── evaluation.py
+    │   ├── evaluation.py
+    │   └── cross_validation.py 
     │
     ├── models/
     │   ├── MLP-1.h5, MLP-2.h5, ...
@@ -44,7 +54,13 @@
     │   ├── roc_curves.png
     │   ├── confusion_matrices.png
     │   ├── scatter_tenure_vs_monthly.png
-    │   └── descriptive_statistics.csv
+    │   ├── descriptive_statistics.csv
+    │   ├── cv_comparison_boxplot.png
+    │   └── cross_validation_results.csv
+    │
+    ├── api/
+    │   ├── app.py
+    │   └── requirements.txt
     │
     ├── .vscode/
     │   └── settings.json
@@ -52,20 +68,27 @@
     ├── .gitignore
     ├── requirements.txt
     ├── README.md
- 
 
-## ⚙️ Requisitos
-    1 - Python 3.10
-    2 - TensorFlow 2.13
-    3 - Pandas, NumPy, Scikit-learn
 
-    4- Instala dependencias:
+---
+
+## ⚙️ Requisitos del Entorno
+
+- Python 3.10
+- TensorFlow 2.13 o superior
+- Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Flask
+
+### Instalación de dependencias
+
     ```bash
-    pip install -r requirements.txt
+    # Crear entorno (recomendado con Conda)
+    conda create -n telco_churn python=3.10
+    conda activate telco_churn
 
-    python main.py
+    # Instalar dependencias
+    pip install -r requirements.txt
     
-▶️ Ejecución del Proyecto 
+## ▶️ Ejecución del Proyecto 
 
     Este proyecto sigue la metodología Top-Down y baby steps enseñada por el Dr. Gutiérrez, con celdas #%% en VS Code para desarrollo interactivo. 
 
@@ -81,7 +104,16 @@
     "Todos los resultados se guardan automáticamente en las carpetas models/ y results/."
 
 --- 
- 
+### Validación Cruzada (5-Fold)
+
+Para evaluar la generalización del modelo, se aplicó validación cruzada estratificada:
+
+| Modelo | F1-CV Mean | F1-CV Std |
+|--------|------------|-----------|
+| Regresión Logística | 0.5813 | 0.0330 |
+| MLP-2 | **0.6151** | **0.0369** |
+
+✅ El modelo **MLP-2** muestra mejor desempeño promedio y es adecuado para producción. 
  
 📊 Resultados 
     
@@ -89,6 +121,42 @@
     ✅ Mejor modelo: MLP-2 (2 capas ocultas, dropout 0.3, Adam, ReLU)
 
     🎯 F1-Score: 0.6042 — superior al modelo base
+
+🌐 API de Producción (Simulada) 
+
+    Una API simple con Flask permite exponer el modelo MLP-2 para predicciones en entornos de producción. 
+    Ejecutar la API 
+
+    Endpoint 
+
+        POST /predict → Recibe datos del cliente y devuelve probabilidad de churn.
+
+Ejemplo de solicitud (usando curl)
+
+curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "gender": "Male",
+    "SeniorCitizen": 0,
+    "Partner": "Yes",
+    "Dependents": "No",
+    "tenure": 24,
+    "PhoneService": "Yes",
+    "MultipleLines": "No",
+    "InternetService": "Fiber optic",
+    "OnlineSecurity": "No",
+    "OnlineBackup": "Yes",
+    "DeviceProtection": "No",
+    "TechSupport": "No",
+    "StreamingTV": "No",
+    "StreamingMovies": "No",
+    "Contract": "Month-to-month",
+    "PaperlessBilling": "Yes",
+    "PaymentMethod": "Electronic check",
+    "MonthlyCharges": 89.5,
+    "TotalCharges": 2148.0
+  }'
+
 
 🧠 Metodología Aplicada 
 
@@ -99,16 +167,21 @@
     Modelos: 5 arquitecturas de MLP con variación de hiperparámetros.
     Evaluación: Métricas en conjunto de prueba (al menos 5 estadísticos).
     Comparación con modelo base: Regresión Logística.
+    Validación cruzada: 5-Fold para evaluar generalización.
      
 
+ 
 🤖 Declaración de Uso de LLM 
 
     Este proyecto fue desarrollado bajo la supervisión del estudiante. Se utilizó una herramienta de inteligencia artificial generativa (LLM) para asistir en la redacción del informe, diseño de la estructura del código, explicaciones técnicas y generación de ejemplos. Todas las decisiones de modelado, análisis de resultados, entrenamiento y validación fueron realizadas y verificadas por el autor. La herramienta no generó resultados directos sin supervisión ni ejecutó código por sí sola. 
      
+
+ 
 📚 Bibliografía 
 
     Chollet, F. (2021). Deep Learning with Python (2nd ed.). Manning.
     Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.
     Kaggle. (2018). Telco Customer Churn Dataset. https://www.kaggle.com/blastchar/telco-customer-churn 
     Dr. Vladimir Gutiérrez. (2025). Redes Neuronales Artificiales y Aprendizaje Profundo (Cap. 01 - Cap. 08-2).
+     
      
