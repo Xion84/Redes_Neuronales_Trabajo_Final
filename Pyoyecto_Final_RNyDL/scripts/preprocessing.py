@@ -1,5 +1,3 @@
-# scripts/preprocessing.py
-
 # %%
 import pandas as pd
 import numpy as np
@@ -155,7 +153,7 @@ def main():
     # Guardar
     save_processed_data(X_train, X_val, X_test, y_train, y_val, y_test)
 
-    print("[INFO] ✅ Preprocesamiento completado con éxito.")
+    print("[INFO] Preprocesamiento completado con éxito.")
 
 
 # %%

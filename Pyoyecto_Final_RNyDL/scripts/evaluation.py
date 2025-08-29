@@ -21,6 +21,31 @@ print(f"[INFO] TensorFlow versión: {tf.__version__}")
 
 
 # %%
+# Cargar datos procesados (para evaluación con modelo base)
+def load_processed_data():
+    """
+    Carga los datos procesados desde la carpeta data/processed/.
+    """
+    X_train = pd.read_csv("../data/processed/X_train.csv").astype("float32").values
+    X_test = pd.read_csv("../data/processed/X_test.csv").astype("float32").values
+    y_train = (
+        pd.read_csv("../data/processed/y_train.csv").values.ravel().astype("float32")
+    )
+    y_test = (
+        pd.read_csv("../data/processed/y_test.csv").values.ravel().astype("float32")
+    )
+
+    print(
+        f"[INFO] Datos procesados cargados. X_train: {X_train.shape}, X_test: {X_test.shape}"
+    )
+    return X_train, X_test, y_train, y_test
+
+
+# Llamar a la función
+X_train, X_test, y_train, y_test = load_processed_data()
+
+
+# %%
 # Cargar datos de prueba
 def load_test_data():
     """
@@ -112,5 +137,52 @@ print(results_df)
 
 # Guardar tabla
 results_df.to_csv("../results/model_comparison.csv", index=False)
+
+# %%
+# %%
+# Comparación con modelo base: Regresión Logística
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, recall_score, f1_score
+
+print("\n[INFO] Entrenando modelo base: Regresión Logística...")
+lr_model = LogisticRegression(max_iter=1000, random_state=42)
+lr_model.fit(X_train, y_train)
+
+# Predicciones
+y_pred_lr = lr_model.predict(X_test)
+y_pred_lr_prob = lr_model.predict_proba(X_test)[:, 1]
+
+# Métricas
+acc_lr = accuracy_score(y_test, y_pred_lr)
+rec_lr = recall_score(y_test, y_pred_lr)
+f1_lr = f1_score(y_test, y_pred_lr)
+
+print(
+    f"Logistic Regression - Accuracy: {acc_lr:.4f}, Recall: {rec_lr:.4f}, F1: {f1_lr:.4f}"
+)
+
+# Añadir a resultados
+results_df = pd.concat(
+    [
+        results_df,
+        pd.DataFrame(
+            [
+                {
+                    "Modelo": "Logistic Regression",
+                    "Accuracy": round(acc_lr, 4),
+                    "Precision": round(precision_score(y_test, y_pred_lr), 4),
+                    "Recall": round(rec_lr, 4),
+                    "F1-Score": round(f1_lr, 4),
+                    "ROC-AUC": round(roc_auc_score(y_test, y_pred_lr_prob), 4),
+                }
+            ]
+        ),
+    ],
+    ignore_index=True,
+)
+
+# Guardar tabla actualizada
+results_df.to_csv("../results/model_comparison.csv", index=False)
+print("\n[INFO] Tabla de comparación actualizada con modelo base.")
 
 # %%
