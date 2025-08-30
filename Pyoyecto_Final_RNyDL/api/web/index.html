@@ -167,6 +167,13 @@
           body: JSON.stringify(data)
         });
 
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error en la respuesta:', errorText);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const result = await response.json();
 
         if (result.churn_prediction) {
