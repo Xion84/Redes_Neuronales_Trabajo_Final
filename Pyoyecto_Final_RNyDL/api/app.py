@@ -1,6 +1,6 @@
 """
 API de Predicción de Churn - Proyecto Final de Redes Neuronales
-Maestría en Análisis de Datos e Inteligencia de Negocios
+Maestría en Inteligencia de Negocios y Análisis de Datos
 Autores: Hubert Gutiérrez, Danilo Matus, Enllely Roque
 Profesor: Dr. Vladimir Gutiérrez
 """
@@ -10,8 +10,11 @@ from flask_cors import CORS
 import pandas as pd
 import numpy as np
 import joblib
-from tensorflow.keras.models import load_model
 import os
+import sys
+
+# Añadir el directorio raíz al path para importar correctamente
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Inicializar la app Flask
 app = Flask(__name__, static_folder="web", static_url_path="/")
@@ -27,6 +30,8 @@ model = None
 scaler = None
 
 try:
+    from tensorflow.keras.models import load_model
+
     model = load_model(MODEL_PATH)
     print("[INFO] Modelo cargado correctamente.")
 except Exception as e:
@@ -63,7 +68,10 @@ def health():
         return jsonify({"status": "OK", "message": "Modelo listo para predicciones"})
     else:
         return jsonify(
-            {"status": "ERROR", "message": "Modelo o scaler no cargado"}
+            {
+                "status": "ERROR",
+                "message": "Modelo, scaler o características no disponibles",
+            }
         ), 500
 
 
@@ -128,7 +136,7 @@ def predict():
         ]
         df = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
 
-        # Asegurar todas las columnas
+        # Asegurar que tenga todas las columnas del entrenamiento
         for col in EXPECTED_FEATURES:
             if col not in df.columns:
                 df[col] = 0
@@ -140,7 +148,7 @@ def predict():
             0
         )
 
-        # Escalar
+        # Escalar variables numéricas
         numeric_features = ["tenure", "MonthlyCharges", "TotalCharges"]
         df[numeric_features] = scaler.transform(df[numeric_features])
 
@@ -149,11 +157,9 @@ def predict():
 
         # Predicción
         prediction = model.predict(X, verbose=0)
-        churn_probability = (
-            float(prediction[0][0]) if prediction[0][0] is not None else 0.0
-        )
+        churn_probability = float(prediction[0][0])
 
-        # Definir churn_prediction
+        # Definir predicción binaria
         churn_prediction = bool(churn_probability > 0.5)
 
         return jsonify(
@@ -174,8 +180,7 @@ def home():
     return app.send_static_file("index.html")
 
 
+# Para que Render ejecute correctamente
 if __name__ == "__main__":
-    # Render asigna el puerto a través de la variable de entorno PORT
     port = int(os.environ.get("PORT", 5000))
-    # ¡Importante! Debe ser 0.0.0.0, no 127.0.0.1
     app.run(host="0.0.0.0", port=port, debug=False)
