@@ -175,5 +175,7 @@ def home():
 
 
 if __name__ == "__main__":
+    # Render asigna el puerto a través de la variable de entorno PORT
     port = int(os.environ.get("PORT", 5000))
+    # ¡Importante! Debe ser 0.0.0.0, no 127.0.0.1
     app.run(host="0.0.0.0", port=port, debug=False)
