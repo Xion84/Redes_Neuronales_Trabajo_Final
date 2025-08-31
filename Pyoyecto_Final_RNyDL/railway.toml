@@ -1,0 +1,10 @@
+# railway.toml
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = { default = "8000" }
+
+[http]
+  port = 8000
