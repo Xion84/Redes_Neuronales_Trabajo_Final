@@ -6,6 +6,7 @@ Profesor: Dr. Vladimir Gutiérrez
 """
 
 # %%
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -19,63 +20,46 @@ app = Flask(__name__, static_folder="web", static_url_path="/")
 CORS(app)  # Habilita CORS para todos los orígenes
 
 # Rutas a los modelos y scaler
+# NOTA: En Render, estas rutas se basan en la estructura de tu repositorio.
 MODEL_PATH = "../models/MLP-2.h5"
 SCALER_PATH = "../models/scaler.pkl"
+DATA_PATH = "../data/processed/X_train.csv"
 
 # Cargar el modelo y el scaler al iniciar la app
 print("[INFO] Cargando modelo y scaler...")
 model = None
 scaler = None
-
-# Cargar el modelo y el scaler al iniciar la app
-print("[INFO] Cargando modelo y scaler...")
-model = None
-scaler = None
-
-# Cargar el modelo y el scaler al iniciar la app
-print("[INFO] Cargando modelo y scaler...")
-model = None
-scaler = None
-
-# Obtener las características esperadas
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-data_path = os.path.join(project_root, "data", "processed", "X_train.csv")
-print(f"[INFO] Buscando X_train.csv en: {data_path}")
-
-# %%
-
 EXPECTED_FEATURES = []
-try:
-    df_temp = pd.read_csv(data_path)
-    EXPECTED_FEATURES = df_temp.columns.tolist()
-    print(
-        f"[INFO] X_train.csv cargado. Número de características: {len(EXPECTED_FEATURES)}"
-    )
-    print(f"[INFO] Columnas esperadas: {EXPECTED_FEATURES}")
-except Exception as e:
-    print(f"[ERROR] No se pudo cargar X_train.csv: {e}")
-    EXPECTED_FEATURES = []
-
-try:
-    from tensorflow.keras.models import load_model
-
-    model = load_model(MODEL_PATH)
-    print(
-        f"[INFO] Modelo cargado correctamente. Capas: {[layer.name for layer in model.layers]}"
-    )
-except Exception as e:
-    print(f"[ERROR] No se pudo cargar el modelo: {e}")
-    model = None
-
 # %%
 try:
-    scaler = joblib.load(SCALER_PATH)
-    print("[INFO] Scaler cargado correctamente.")
-except Exception as e:
-    print(f"[ERROR] No se pudo cargar el scaler: {e}")
-    scaler = None
+    if os.path.exists(DATA_PATH):
+        df_temp = pd.read_csv(DATA_PATH)
+        EXPECTED_FEATURES = df_temp.columns.tolist()
+        print(
+            f"[INFO] X_train.csv cargado. Número de características: {len(EXPECTED_FEATURES)}"
+        )
+        print(f"[INFO] Columnas esperadas: {EXPECTED_FEATURES}")
+    else:
+        print(f"[ERROR] No se encontró el archivo: {DATA_PATH}")
 
-# %%
+    # Cargar el modelo
+    if os.path.exists(MODEL_PATH):
+        model = load_model(MODEL_PATH)
+        print(
+            f"[INFO] Modelo cargado correctamente. Capas: {[layer.name for layer in model.layers]}"
+        )
+    else:
+        print(f"[ERROR] No se encontró el archivo del modelo: {MODEL_PATH}")
+
+    # Cargar el scaler
+    if os.path.exists(SCALER_PATH):
+        scaler = joblib.load(SCALER_PATH)
+        print("[INFO] Scaler cargado correctamente.")
+    else:
+        print(f"[ERROR] No se encontró el archivo del scaler: {SCALER_PATH}")
+
+except Exception as e:
+    print(f"[ERROR] Ocurrió un error al cargar los archivos: {e}")
 
 
 @app.route("/health", methods=["GET"])
@@ -85,7 +69,10 @@ def health():
         return jsonify({"status": "OK", "message": "Modelo listo para predicciones"})
     else:
         return jsonify(
-            {"status": "ERROR", "message": "Modelo o scaler no cargado"}
+            {
+                "status": "ERROR",
+                "message": "Modelo, scaler o características no cargado",
+            }
         ), 500
 
 
