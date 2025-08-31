@@ -5,6 +5,7 @@ Autores: Hubert Gutiérrez, Danilo Matus, Enllely Roque
 Profesor: Dr. Vladimir Gutiérrez
 """
 
+# %%
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -18,8 +19,8 @@ app = Flask(__name__, static_folder="web", static_url_path="/")
 CORS(app)  # Habilita CORS para todos los orígenes
 
 # Rutas a los modelos y scaler
-MODEL_PATH = "./models/MLP-2.h5"
-SCALER_PATH = "./models/scaler.pkl"
+MODEL_PATH = "../models/MLP-2.h5"
+SCALER_PATH = "../models/scaler.pkl"
 
 # Cargar el modelo y el scaler al iniciar la app
 print("[INFO] Cargando modelo y scaler...")
@@ -41,6 +42,9 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 data_path = os.path.join(project_root, "data", "processed", "X_train.csv")
 print(f"[INFO] Buscando X_train.csv en: {data_path}")
 
+# %%
+
+EXPECTED_FEATURES = []
 try:
     df_temp = pd.read_csv(data_path)
     EXPECTED_FEATURES = df_temp.columns.tolist()
@@ -63,6 +67,7 @@ except Exception as e:
     print(f"[ERROR] No se pudo cargar el modelo: {e}")
     model = None
 
+# %%
 try:
     scaler = joblib.load(SCALER_PATH)
     print("[INFO] Scaler cargado correctamente.")
@@ -70,20 +75,7 @@ except Exception as e:
     print(f"[ERROR] No se pudo cargar el scaler: {e}")
     scaler = None
 
-# Obtener las características esperadas
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-data_path = os.path.join(project_root, "data", "processed", "X_train.csv")
-print(f"[INFO] Buscando X_train.csv en: {data_path}")
-
-EXPECTED_FEATURES = []
-try:
-    df_temp = pd.read_csv(data_path)
-    EXPECTED_FEATURES = df_temp.columns.tolist()
-    print(
-        f"[INFO] X_train.csv cargado. Número de características: {len(EXPECTED_FEATURES)}"
-    )
-except Exception as e:
-    print(f"[ERROR] No se pudo cargar X_train.csv: {e}")
+# %%
 
 
 @app.route("/health", methods=["GET"])
@@ -208,3 +200,5 @@ def home():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
+
+# %%
