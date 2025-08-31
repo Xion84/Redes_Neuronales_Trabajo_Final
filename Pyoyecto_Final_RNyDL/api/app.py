@@ -15,18 +15,19 @@ import os
 
 # --- INICIO DE CAMBIOS ---
 
-# Directorio base del proyecto (la carpeta donde se encuentra este script, app.py)
-# Esto crea una ruta absoluta y robusta que funciona siempre.
-basedir = os.path.abspath(os.path.dirname(__file__))
+# Directorio de la API (la carpeta donde se encuentra este script, app.py)
+api_dir = os.path.abspath(os.path.dirname(__file__))
+# El directorio raíz del proyecto está un nivel POR ENCIMA de la carpeta 'api'.
+project_root = os.path.dirname(api_dir)
 
 # Inicializar la app Flask
 app = Flask(__name__, static_folder="web", static_url_path="/")
 CORS(app)  # Habilita CORS para todos los orígenes
 
-# Rutas a los modelos y scaler usando el directorio base para evitar errores
-MODEL_PATH = os.path.join(basedir, "models", "MLP-2.h5")
-SCALER_PATH = os.path.join(basedir, "models", "scaler.pkl")
-DATA_PATH = os.path.join(basedir, "data", "processed", "X_train.csv")
+# Rutas a los modelos y scaler usando el directorio raíz del proyecto para que siempre los encuentre.
+MODEL_PATH = os.path.join(project_root, "models", "MLP-2.h5")
+SCALER_PATH = os.path.join(project_root, "models", "scaler.pkl")
+DATA_PATH = os.path.join(project_root, "data", "processed", "X_train.csv")
 
 # --- FIN DE CAMBIOS ---
 
