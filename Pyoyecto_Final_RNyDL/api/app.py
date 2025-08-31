@@ -5,40 +5,40 @@ Autores: Hubert Gutiérrez, Danilo Matus, Enllely Roque
 Profesor: Dr. Vladimir Gutiérrez
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pandas as pd
-import numpy as np
 import joblib
-from tensorflow.keras.models import load_model
 import os
 
-# --- INICIO DE CAMBIOS ---
-
-# Directorio de la API (la carpeta donde se encuentra este script, app.py)
+# --- INICIO: Configuración de rutas ---
+# Directorio actual (donde está app.py)
 api_dir = os.path.abspath(os.path.dirname(__file__))
-# El directorio raíz del proyecto está un nivel POR ENCIMA de la carpeta 'api'.
+
+# Directorio raíz del proyecto (un nivel arriba de 'api')
 project_root = os.path.dirname(api_dir)
 
-# Inicializar la app Flask
-app = Flask(__name__, static_folder="web", static_url_path="/")
-CORS(app)  # Habilita CORS para todos los orígenes
-
-# Rutas a los modelos y scaler usando el directorio raíz del proyecto para que siempre los encuentre.
+# Rutas a los archivos
 MODEL_PATH = os.path.join(project_root, "models", "MLP-2.h5")
 SCALER_PATH = os.path.join(project_root, "models", "scaler.pkl")
 DATA_PATH = os.path.join(project_root, "data", "processed", "X_train.csv")
+WEB_FOLDER = os.path.join(api_dir, "web")
+# --- FIN: Configuración de rutas ---
 
-# --- FIN DE CAMBIOS ---
+# Inicializar la app Flask
+app = Flask(__name__, static_folder=WEB_FOLDER, static_url_path="/")
+CORS(app)  # Habilita CORS para todos los orígenes
 
-
-# Cargar el modelo y el scaler al iniciar la app
-print("[INFO] Cargando modelo y scaler...")
+# Variables globales para modelo, scaler y características
 model = None
 scaler = None
 EXPECTED_FEATURES = []
 
+# --- Carga de recursos al iniciar la app ---
+print("[INFO] Cargando modelo, scaler y características esperadas...")
+
 try:
+    # Cargar X_train.csv para obtener las características
     print(f"[INFO] Buscando X_train.csv en: {DATA_PATH}")
     if os.path.exists(DATA_PATH):
         df_temp = pd.read_csv(DATA_PATH)
@@ -46,19 +46,20 @@ try:
         print(
             f"[INFO] X_train.csv cargado. Número de características: {len(EXPECTED_FEATURES)}"
         )
-        print(f"[INFO] Columnas esperadas: {EXPECTED_FEATURES}")
     else:
-        print(f"[ERROR] No se encontró el archivo de datos: {DATA_PATH}")
+        raise FileNotFoundError(f"Archivo no encontrado: {DATA_PATH}")
 
     # Cargar el modelo
     print(f"[INFO] Buscando modelo en: {MODEL_PATH}")
     if os.path.exists(MODEL_PATH):
+        from tensorflow.keras.models import load_model
+
         model = load_model(MODEL_PATH)
         print(
             f"[INFO] Modelo cargado correctamente. Capas: {[layer.name for layer in model.layers]}"
         )
     else:
-        print(f"[ERROR] No se encontró el archivo del modelo: {MODEL_PATH}")
+        raise FileNotFoundError(f"Archivo no encontrado: {MODEL_PATH}")
 
     # Cargar el scaler
     print(f"[INFO] Buscando scaler en: {SCALER_PATH}")
@@ -66,15 +67,22 @@ try:
         scaler = joblib.load(SCALER_PATH)
         print("[INFO] Scaler cargado correctamente.")
     else:
-        print(f"[ERROR] No se encontró el archivo del scaler: {SCALER_PATH}")
+        raise FileNotFoundError(f"Archivo no encontrado: {SCALER_PATH}")
+
+    print("[INFO] Todos los recursos cargados correctamente.")
 
 except Exception as e:
-    print(f"[ERROR] Ocurrió un error al cargar los archivos: {e}")
+    print(f"[ERROR] No se pudieron cargar los recursos: {e}")
+    model = None
+    scaler = None
+    EXPECTED_FEATURES = []
+
+# --- ENDPOINTS DE LA API ---
 
 
 @app.route("/health", methods=["GET"])
 def health():
-    """Endpoint de salud para verificar si el modelo está listo"""
+    """Endpoint de salud: Verifica si la API está funcionando."""
     if model is not None and scaler is not None and EXPECTED_FEATURES:
         return jsonify({"status": "OK", "message": "Modelo listo para predicciones"})
     else:
@@ -88,7 +96,7 @@ def health():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    """Endpoint de predicción"""
+    """Endpoint de predicción: Recibe datos del cliente y devuelve la probabilidad de churn."""
     if model is None or scaler is None or not EXPECTED_FEATURES:
         return jsonify(
             {"error": "Modelo, scaler o características no disponibles"}
@@ -148,11 +156,11 @@ def predict():
         ]
         df = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
 
-        # Asegurar que tenga todas las columnas de X_train y en el mismo orden
+        # Asegurar que tenga todas las columnas esperadas y en el mismo orden
         for col in EXPECTED_FEATURES:
             if col not in df.columns:
                 df[col] = 0
-        df = df[EXPECTED_FEATURES]  # Reordenar para que coincida
+        df = df[EXPECTED_FEATURES]
 
         # Convertir SeniorCitizen a int
         df["SeniorCitizen"] = df["SeniorCitizen"].astype(int)
@@ -173,7 +181,7 @@ def predict():
         prediction = model.predict(X, verbose=0)
         churn_probability = float(prediction[0][0])
 
-        # Definir churn_prediction
+        # Definir predicción binaria
         churn_prediction = bool(churn_probability > 0.5)
 
         return jsonify(
@@ -184,11 +192,18 @@ def predict():
         )
 
     except Exception as e:
-        print(f"[ERROR] {e}")
+        print(f"[ERROR] Error durante la predicción: {e}")
         return jsonify({"error": str(e)}), 500
 
 
 @app.route("/")
 def home():
-    """Servir la página web"""
-    return app.send_static_file("index.html")
+    """Sirve la página web principal (index.html)."""
+    return send_from_directory(WEB_FOLDER, "index.html")
+
+
+# --- Inicio de la aplicación ---
+if __name__ == "__main__":
+    # Usa el puerto asignado por Railway o 5000 en local
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
