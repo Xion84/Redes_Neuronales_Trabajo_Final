@@ -198,7 +198,7 @@ def home():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))  # Usa $PORT en Render, 5000 en local
     app.run(host="0.0.0.0", port=port, debug=False)
 
 # %%
