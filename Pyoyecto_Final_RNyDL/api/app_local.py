@@ -5,6 +5,8 @@ Autores: Hubert Gutiérrez, Danilo Matus, Enllely Roque
 Profesor: Dr. Vladimir Gutiérrez
 """
 
+# %%
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -13,32 +15,23 @@ import joblib
 from tensorflow.keras.models import load_model
 import os
 
-# --- INICIO DE CAMBIOS ---
-
-# Directorio base del proyecto (la carpeta donde se encuentra este script, app.py)
-# Esto crea una ruta absoluta y robusta que funciona siempre.
-basedir = os.path.abspath(os.path.dirname(__file__))
-
 # Inicializar la app Flask
 app = Flask(__name__, static_folder="web", static_url_path="/")
 CORS(app)  # Habilita CORS para todos los orígenes
 
-# Rutas a los modelos y scaler usando el directorio base para evitar errores
-MODEL_PATH = os.path.join(basedir, "models", "MLP-2.h5")
-SCALER_PATH = os.path.join(basedir, "models", "scaler.pkl")
-DATA_PATH = os.path.join(basedir, "data", "processed", "X_train.csv")
-
-# --- FIN DE CAMBIOS ---
-
+# Rutas a los modelos y scaler
+# NOTA: En Render, estas rutas se basan en la estructura de tu repositorio.
+MODEL_PATH = "../models/MLP-2.h5"
+SCALER_PATH = "../models/scaler.pkl"
+DATA_PATH = "../data/processed/X_train.csv"
 
 # Cargar el modelo y el scaler al iniciar la app
 print("[INFO] Cargando modelo y scaler...")
 model = None
 scaler = None
 EXPECTED_FEATURES = []
-
+# %%
 try:
-    print(f"[INFO] Buscando X_train.csv en: {DATA_PATH}")
     if os.path.exists(DATA_PATH):
         df_temp = pd.read_csv(DATA_PATH)
         EXPECTED_FEATURES = df_temp.columns.tolist()
@@ -47,10 +40,9 @@ try:
         )
         print(f"[INFO] Columnas esperadas: {EXPECTED_FEATURES}")
     else:
-        print(f"[ERROR] No se encontró el archivo de datos: {DATA_PATH}")
+        print(f"[ERROR] No se encontró el archivo: {DATA_PATH}")
 
     # Cargar el modelo
-    print(f"[INFO] Buscando modelo en: {MODEL_PATH}")
     if os.path.exists(MODEL_PATH):
         model = load_model(MODEL_PATH)
         print(
@@ -60,7 +52,6 @@ try:
         print(f"[ERROR] No se encontró el archivo del modelo: {MODEL_PATH}")
 
     # Cargar el scaler
-    print(f"[INFO] Buscando scaler en: {SCALER_PATH}")
     if os.path.exists(SCALER_PATH):
         scaler = joblib.load(SCALER_PATH)
         print("[INFO] Scaler cargado correctamente.")
@@ -73,14 +64,14 @@ except Exception as e:
 
 @app.route("/health", methods=["GET"])
 def health():
-    """Endpoint de salud para verificar si el modelo está listo"""
+    """Endpoint de salud"""
     if model is not None and scaler is not None and EXPECTED_FEATURES:
         return jsonify({"status": "OK", "message": "Modelo listo para predicciones"})
     else:
         return jsonify(
             {
                 "status": "ERROR",
-                "message": "Modelo, scaler o características no cargados.",
+                "message": "Modelo, scaler o características no cargado",
             }
         ), 500
 
@@ -191,3 +182,10 @@ def predict():
 def home():
     """Servir la página web"""
     return app.send_static_file("index.html")
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Usa $PORT en Render, 5000 en local
+    app.run(host="0.0.0.0", port=port, debug=False)
+
+# %%
