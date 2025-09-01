@@ -163,7 +163,7 @@ Una API simple con Flask permite exponer el modelo MLP-2 para predicciones en en
 
 🌐 API en la Nube (railway y huggingface) 
 
-    La API está desplegada en railway y es accesible desde cualquier navegador: 
+    La API está desplegada en railway y huggingface, es accesible desde cualquier navegador: 
 
     Aplicación desplegada en railway
     URL: https://redesneuronalestrabajofinal-production.up.railway.app/  
