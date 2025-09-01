@@ -161,17 +161,21 @@ Una API simple con Flask permite exponer el modelo MLP-2 para predicciones en en
         "TotalCharges": 2148.0
     }'
 
-🌐 API en la Nube (Render) 
+🌐 API en la Nube (railway y huggingface) 
 
-    La API está desplegada en Render y es accesible desde cualquier navegador: 
+    La API está desplegada en railway y es accesible desde cualquier navegador: 
 
-    URL: https://churn-prediction-api-1cqs.onrender.com 
+    Aplicación desplegada en railway
+    URL: https://redesneuronalestrabajofinal-production.up.railway.app/  
+
+    Aplicación desplegada en huggingface
+    URL: https://huggingface.co/spaces/Xion84/churn-prediction-telco
 
     Endpoints 
 
-    GET /health → Verifica estado del modelo.
+    GET https://redesneuronalestrabajofinal-production.up.railway.app/  /health → Verifica estado del modelo.
     POST /predict → Realiza predicción de churn.
-    GET / → Página web interactiva.
+    
      
 
     ✅ Esta demostración confirma que el modelo puede ser usado en producción real. 
