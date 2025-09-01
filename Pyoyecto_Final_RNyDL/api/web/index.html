@@ -78,6 +78,16 @@
             </select>
           </div>
 
+          <!-- CAMPOS AÑADIDOS PARA COMPLETAR EL FORMULARIO -->
+          <div class="form-group">
+            <label for="MultipleLines">¿Múltiples líneas?</label>
+            <select id="MultipleLines" required>
+                <option value="No">No</option>
+                <option value="Yes">Sí</option>
+                <option value="No phone service">Sin servicio telefónico</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label for="InternetService">Servicio de Internet</label>
             <select id="InternetService" required>
@@ -85,6 +95,60 @@
               <option value="DSL">DSL</option>
               <option value="Fiber optic">Fibra Óptica</option>
               <option value="No">No</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="OnlineSecurity">Seguridad Online</label>
+            <select id="OnlineSecurity" required>
+                <option value="No">No</option>
+                <option value="Yes">Sí</option>
+                <option value="No internet service">Sin servicio de internet</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="OnlineBackup">Backup Online</label>
+            <select id="OnlineBackup" required>
+                <option value="No">No</option>
+                <option value="Yes">Sí</option>
+                <option value="No internet service">Sin servicio de internet</option>
+            </select>
+          </div>
+
+           <div class="form-group">
+            <label for="DeviceProtection">Protección de Dispositivo</label>
+            <select id="DeviceProtection" required>
+                <option value="No">No</option>
+                <option value="Yes">Sí</option>
+                <option value="No internet service">Sin servicio de internet</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="TechSupport">Soporte Técnico</label>
+            <select id="TechSupport" required>
+                <option value="No">No</option>
+                <option value="Yes">Sí</option>
+                <option value="No internet service">Sin servicio de internet</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="StreamingTV">Streaming TV</label>
+            <select id="StreamingTV" required>
+                <option value="No">No</option>
+                <option value="Yes">Sí</option>
+                <option value="No internet service">Sin servicio de internet</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="StreamingMovies">Streaming Películas</label>
+            <select id="StreamingMovies" required>
+                <option value="No">No</option>
+                <option value="Yes">Sí</option>
+                <option value="No internet service">Sin servicio de internet</option>
             </select>
           </div>
 
@@ -97,6 +161,25 @@
               <option value="Two year">Dos años</option>
             </select>
           </div>
+
+          <div class="form-group">
+            <label for="PaperlessBilling">Facturación sin papel</label>
+            <select id="PaperlessBilling" required>
+                <option value="Yes">Sí</option>
+                <option value="No">No</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="PaymentMethod">Método de Pago</label>
+            <select id="PaymentMethod" required>
+                <option value="Electronic check">Cheque electrónico</option>
+                <option value="Mailed check">Cheque por correo</option>
+                <option value="Bank transfer (automatic)">Transferencia bancaria</option>
+                <option value="Credit card (automatic)">Tarjeta de crédito</option>
+            </select>
+          </div>
+          <!-- FIN DE CAMPOS AÑADIDOS -->
 
           <div class="form-group">
             <label for="MonthlyCharges">Cargos mensuales ($)</label>
@@ -149,23 +232,31 @@
         Dependents: form.Dependents.value,
         tenure: parseInt(form.tenure.value),
         PhoneService: form.PhoneService.value,
-        MultipleLines: form.MultipleLines?.value || "No",
+        MultipleLines: form.MultipleLines.value,
         InternetService: form.InternetService.value,
-        OnlineSecurity: form.OnlineSecurity?.value || "No",
-        OnlineBackup: form.OnlineBackup?.value || "No",
-        DeviceProtection: form.DeviceProtection?.value || "No",
-        TechSupport: form.TechSupport?.value || "No",
-        StreamingTV: form.StreamingTV?.value || "No",
-        StreamingMovies: form.StreamingMovies?.value || "No",
+        OnlineSecurity: form.OnlineSecurity.value,
+        OnlineBackup: form.OnlineBackup.value,
+        DeviceProtection: form.DeviceProtection.value,
+        TechSupport: form.TechSupport.value,
+        StreamingTV: form.StreamingTV.value,
+        StreamingMovies: form.StreamingMovies.value,
         Contract: form.Contract.value,
-        PaperlessBilling: form.PaperlessBilling?.value || "No",
-        PaymentMethod: form.PaymentMethod?.value || "Electronic check",
+        PaperlessBilling: form.PaperlessBilling.value,
+        PaymentMethod: form.PaymentMethod.value,
         MonthlyCharges: parseFloat(form.MonthlyCharges.value),
         TotalCharges: parseFloat(form.TotalCharges.value)
       };
+      
+      // Muestra el modal mientras se procesa
+      modal.className = 'modal';
+      modalIcon.textContent = '⏳';
+      modalTitle.textContent = 'Procesando...';
+      modalMessage.textContent = 'Conectando con el modelo de predicción.';
+      modal.style.display = 'flex';
 
       try {
-        const response = await fetch('redesneuronalestrabajofinal-production.up.railway.app', {
+        // <-- URL CORREGIDA: Se añade https:// y el endpoint /predict
+        const response = await fetch('https://redesneuronalesfinal-production.up.railway.app/predict', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -174,11 +265,16 @@
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Error en la respuesta:', errorText);
-          throw new Error(`HTTP error! status: ${response.status}`);
+          console.error('Error en la respuesta del servidor:', errorText);
+          throw new Error(`Error del servidor: ${response.status}`);
         }
 
         const result = await response.json();
+        
+        // Manejar posible error devuelto por la API en formato JSON
+        if (result.error) {
+            throw new Error(result.error);
+        }
 
         if (result.churn_prediction) {
           modal.className = 'modal high-risk';
@@ -192,14 +288,16 @@
           modalMessage.textContent = `Probabilidad de churn: ${(result.churn_probability * 100).toFixed(2)}%`;
         }
 
-        modal.style.display = 'flex';
       } catch (error) {
+        console.error('Error en el fetch:', error);
         modal.className = 'modal';
         modalIcon.textContent = '❌';
         modalTitle.textContent = 'ERROR';
-        modalMessage.textContent = 'No se pudo conectar con el modelo.';
-        modal.style.display = 'flex';
+        modalMessage.textContent = 'No se pudo conectar con el modelo. Revisa la consola para más detalles.';
       }
+      
+      // Asegurarse de que el modal sea visible después del fetch
+      modal.style.display = 'flex';
     });
 
     function closeModal() {
